@@ -1,8 +1,23 @@
 # Password-Generator
 Secure Solari-style password generator
 
+## Features:
+✅ Solari split-flap tile animation
+✅ 12 and 16 character password lengths
+✅ crypto.getRandomValues() — no Math.random()
+✅ Password masked by default with Reveal / Hide toggle
+✅ Clipboard card with 45s countdown reminder
+✅ Manual Wipe Clipboard Now button
+✅ LED 1 — Amber while generating
+✅ LED 2 — Green when password is ready
+✅ LED 3 — Amber when clipboard is hot or password is revealed, Red on error
+✅ Security health banner tied to LED 3
+✅ LED legend key at the bottom
+✅ Win+V clipboard history warning
+✅ No storage, no cookies, no network calls
 
-## 🔴🟡🟢 Status Indicator LEDs
+
+### 🔴🟡🟢 Status Indicator LEDs
 
 The three LED indicators in the top-right corner of the application act as a 
 real-time security status panel, inspired by classic Solari departure boards 
