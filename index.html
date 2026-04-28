@@ -3,7 +3,25 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Secure Solari-style password generator. Generates cryptographically strong passwords with no storage, no cookies and no network calls."/>
+<meta name="theme-color" content="#7a5c10"/>
+
+<!-- PWA manifest — required for Microsoft Store submission -->
+<link rel="manifest" href="manifest.json"/>
+
+<!-- iOS / Safari PWA support -->
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="PassGen"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+
+<!-- Windows tile / Edge PWA -->
+<meta name="msapplication-TileColor" content="#7a5c10"/>
+<meta name="msapplication-TileImage" content="icons/icon-192.png"/>
+<meta name="msapplication-config" content="none"/>
+
 <title>Password Generator</title>
+
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
   *{box-sizing:border-box;margin:0;padding:0;}
@@ -18,98 +36,47 @@
   }
 
   .board{
-    background:#f0ece0;
-    border-radius:10px;
-    border:3px solid #b0a880;
-    padding:22px 20px 20px;
-    width:100%;
-    max-width:680px;
+    background:#f0ece0;border-radius:10px;border:3px solid #b0a880;
+    padding:22px 20px 20px;width:100%;max-width:680px;
   }
 
   /* ── header ── */
-  .hdr{
-    display:flex;align-items:center;justify-content:space-between;
-    margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #b0a880;
-  }
+  .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #b0a880;}
   .brand{font-size:13px;letter-spacing:3px;color:#5a4e20;text-transform:uppercase;font-weight:bold;}
   .hright{display:flex;align-items:center;gap:12px;}
   .leds{display:flex;gap:6px;align-items:center;}
-  .led{
-    width:9px;height:9px;border-radius:50%;
-    background:#c8c0a0;border:1px solid #a09870;
-    transition:background .3s,box-shadow .3s;
-  }
+  .led{width:9px;height:9px;border-radius:50%;background:#c8c0a0;border:1px solid #a09870;transition:background .3s,box-shadow .3s;}
   .led.green{background:#22cc66;box-shadow:0 0 6px #22cc66;}
   .led.amber{background:#ffaa00;box-shadow:0 0 6px #ffaa00;}
   .led.red  {background:#ee3333;box-shadow:0 0 7px #ee3333;}
 
   /* ── tiles ── */
-  .dlabel{
-    font-size:9px;letter-spacing:3px;color:#7a6e48;
-    text-align:center;margin-bottom:8px;text-transform:uppercase;
-  }
-  .trow{
-    display:flex;gap:3px;justify-content:center;
-    margin-bottom:6px;flex-wrap:nowrap;
-  }
-  .tile{
-    width:34px;height:50px;background:#1a1810;
-    border-radius:3px;border:1px solid rgba(0,0,0,.4);
-    position:relative;overflow:hidden;flex-shrink:0;
-  }
-  .tile::after{
-    content:'';position:absolute;left:0;right:0;top:50%;
-    height:1px;background:rgba(0,0,0,.7);z-index:2;
-  }
-  .th{
-    position:absolute;top:0;left:0;right:0;height:50%;
-    background:#252210;display:flex;align-items:flex-end;
-    justify-content:center;overflow:hidden;border-radius:3px 3px 0 0;
-  }
-  .tb{
-    position:absolute;bottom:0;left:0;right:0;height:50%;
-    background:#1a1810;display:flex;align-items:flex-start;
-    justify-content:center;overflow:hidden;border-radius:0 0 3px 3px;
-  }
+  .dlabel{font-size:9px;letter-spacing:3px;color:#7a6e48;text-align:center;margin-bottom:8px;text-transform:uppercase;}
+  .trow{display:flex;gap:3px;justify-content:center;margin-bottom:6px;flex-wrap:nowrap;}
+  .tile{width:34px;height:50px;background:#1a1810;border-radius:3px;border:1px solid rgba(0,0,0,.4);position:relative;overflow:hidden;flex-shrink:0;}
+  .tile::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.7);z-index:2;}
+  .th{position:absolute;top:0;left:0;right:0;height:50%;background:#252210;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:3px 3px 0 0;}
+  .tb{position:absolute;bottom:0;left:0;right:0;height:50%;background:#1a1810;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;border-radius:0 0 3px 3px;}
   .tc {font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:bold;color:#f5f0d0;line-height:1;transform:translateY(50%);display:block;}
   .tb2{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:bold;color:#f5f0d0;line-height:1;transform:translateY(-50%);display:block;}
   .tile.masked .tc,.tile.masked .tb2{color:#e8a020;font-size:22px;}
 
   /* ── reveal row ── */
-  .rrow{
-    display:flex;align-items:center;justify-content:center;
-    gap:10px;min-height:28px;margin-bottom:4px;
-  }
-  .rbtn{
-    font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;
-    text-transform:uppercase;color:#5a4e20;background:#e8e0cc;
-    border:1.5px solid #a09060;border-radius:4px;padding:5px 14px;
-    cursor:pointer;font-weight:bold;transition:all .15s;outline:none;
-    display:flex;align-items:center;gap:6px;
-  }
+  .rrow{display:flex;align-items:center;justify-content:center;gap:10px;min-height:28px;margin-bottom:4px;}
+  .rbtn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#5a4e20;background:#e8e0cc;border:1.5px solid #a09060;border-radius:4px;padding:5px 14px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:6px;}
   .rbtn:hover{background:#d8d0b8;}
 
-  /* ── security health banner (LED 3) ── */
-  .sec-banner{
-    display:none;border-radius:5px;padding:8px 12px;
-    margin-bottom:10px;font-size:10px;letter-spacing:.5px;
-    line-height:1.6;border:1.5px solid;
-  }
+  /* ── security banner (LED 3) ── */
+  .sec-banner{display:none;border-radius:5px;padding:8px 12px;margin-bottom:10px;font-size:10px;letter-spacing:.5px;line-height:1.6;border:1.5px solid;}
   .sec-banner.show{display:flex;align-items:flex-start;gap:8px;}
   .sec-banner.amber-band{background:#fffbe6;border-color:#e0b030;color:#7a5000;}
   .sec-banner.red-band  {background:#fff0f0;border-color:#e05050;color:#7a1010;}
   .sec-banner svg{flex-shrink:0;margin-top:1px;}
   .sec-banner-txt{flex:1;}
-  .sec-banner-title{
-    font-weight:bold;font-size:9px;letter-spacing:2px;
-    text-transform:uppercase;margin-bottom:2px;
-  }
+  .sec-banner-title{font-weight:bold;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;}
 
   /* ── clipboard card ── */
-  .clipcard{
-    display:none;border-radius:6px;padding:12px 14px;
-    margin-bottom:10px;border:1.5px solid;
-  }
+  .clipcard{display:none;border-radius:6px;padding:12px 14px;margin-bottom:10px;border:1.5px solid;}
   .clipcard.show{display:block;}
   .clipcard.safe{background:#e8f8ee;border-color:#60b878;}
   .clipcard.live{background:#fff8e0;border-color:#e0a030;}
@@ -127,93 +94,40 @@
   .clipcard-timer{display:flex;align-items:center;gap:10px;margin-top:8px;}
   .clipcard-secs{font-size:22px;font-weight:bold;color:#cc7700;width:44px;flex-shrink:0;line-height:1;}
   .clipcard-timer-right{flex:1;}
-  .clipcard-timer-label{
-    font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-    color:#7a4800;margin-bottom:4px;opacity:.8;
-  }
+  .clipcard-timer-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#7a4800;margin-bottom:4px;opacity:.8;}
   .clipbar{height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden;}
   .clipfill{height:100%;background:#cc7700;border-radius:3px;transition:width 1s linear;}
-  .wipebtn{
-    font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;
-    text-transform:uppercase;color:#7a3010;background:#fff0e0;
-    border:1.5px solid #e07030;border-radius:4px;padding:7px 16px;
-    cursor:pointer;font-weight:bold;transition:all .15s;outline:none;
-    display:flex;align-items:center;gap:7px;
-    margin-top:10px;width:100%;justify-content:center;
-  }
+  .wipebtn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a3010;background:#fff0e0;border:1.5px solid #e07030;border-radius:4px;padding:7px 16px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:7px;margin-top:10px;width:100%;justify-content:center;}
   .wipebtn:hover{background:#ffe0c8;}
   .wipebtn:active{transform:scale(.98);}
 
   /* ── controls ── */
-  .ctrl{
-    margin-top:14px;padding-top:14px;
-    border-top:2px solid #b0a880;
-    display:flex;flex-direction:column;gap:10px;
-  }
+  .ctrl{margin-top:14px;padding-top:14px;border-top:2px solid #b0a880;display:flex;flex-direction:column;gap:10px;}
   .lsel{display:flex;gap:10px;justify-content:center;}
-  .sbtn{
-    font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;
-    color:#5a4e20;background:#e0d8c0;border:2px solid #a09060;
-    border-radius:4px;padding:9px 28px;cursor:pointer;
-    text-transform:uppercase;font-weight:bold;transition:all .2s;outline:none;
-  }
+  .sbtn{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;color:#5a4e20;background:#e0d8c0;border:2px solid #a09060;border-radius:4px;padding:9px 28px;cursor:pointer;text-transform:uppercase;font-weight:bold;transition:all .2s;outline:none;}
   .sbtn.on{color:#fff;background:#7a5c10;border-color:#5a3c08;}
   .sbtn:hover:not(.on){opacity:.75;}
-
-  .strwrap{
-    display:flex;align-items:center;gap:10px;
-    background:#e4dcc8;border-radius:4px;padding:8px 12px;border:1px solid #b0a878;
-  }
+  .strwrap{display:flex;align-items:center;gap:10px;background:#e4dcc8;border-radius:4px;padding:8px 12px;border:1px solid #b0a878;}
   .strlbl{font-size:10px;letter-spacing:2px;color:#5a4e20;text-transform:uppercase;width:58px;flex-shrink:0;font-weight:bold;}
   .strbar{flex:1;height:6px;background:#c8c0a8;border-radius:3px;overflow:hidden;}
   .strfill{height:100%;width:0%;background:#22cc66;transition:width .5s,background .5s;border-radius:3px;}
   .strval{font-size:10px;letter-spacing:1px;color:#5a4e20;width:70px;text-align:right;text-transform:uppercase;flex-shrink:0;font-weight:bold;}
-
-  .gbtn{
-    font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:3px;
-    text-transform:uppercase;color:#fff;background:#7a5c10;
-    border:2px solid #5a3c08;border-radius:4px;padding:13px 0;
-    cursor:pointer;width:100%;font-weight:bold;transition:all .15s;outline:none;
-  }
+  .gbtn{font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:3px;text-transform:uppercase;color:#fff;background:#7a5c10;border:2px solid #5a3c08;border-radius:4px;padding:13px 0;cursor:pointer;width:100%;font-weight:bold;transition:all .15s;outline:none;}
   .gbtn:hover{background:#9a7418;}
   .gbtn:active{transform:scale(.98);}
   .gbtn:disabled{opacity:.45;cursor:not-allowed;}
-
   .arow{display:flex;gap:10px;}
-  .cpbtn{
-    font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;
-    text-transform:uppercase;color:#3a5a20;background:#d8ecc8;
-    border:2px solid #80aa50;border-radius:4px;padding:10px 0;
-    cursor:pointer;font-weight:bold;transition:all .15s;outline:none;flex:1;
-  }
+  .cpbtn{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#3a5a20;background:#d8ecc8;border:2px solid #80aa50;border-radius:4px;padding:10px 0;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;flex:1;}
   .cpbtn:hover{background:#c0e0a8;}
-  .clrbtn{
-    font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;
-    text-transform:uppercase;color:#8b2020;background:#fce8e8;
-    border:2px solid #e08080;border-radius:4px;padding:10px 16px;
-    cursor:pointer;font-weight:bold;transition:all .15s;outline:none;
-    display:flex;align-items:center;gap:6px;
-  }
+  .clrbtn{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8b2020;background:#fce8e8;border:2px solid #e08080;border-radius:4px;padding:10px 16px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:6px;}
   .clrbtn:hover{background:#f8d0d0;}
-
   .strow{display:flex;align-items:center;justify-content:center;min-height:18px;}
-  .stmsg{
-    font-size:11px;letter-spacing:2px;color:#228844;
-    opacity:0;transition:opacity .3s;text-transform:uppercase;font-weight:bold;
-  }
+  .stmsg{font-size:11px;letter-spacing:2px;color:#228844;opacity:0;transition:opacity .3s;text-transform:uppercase;font-weight:bold;}
   .stmsg.show{opacity:1;}
+  .secnote{font-size:9px;letter-spacing:1.5px;color:#7a6e48;text-align:center;text-transform:uppercase;line-height:1.7;background:#e4dcc8;border-radius:4px;padding:8px;border:1px solid #b0a878;}
 
-  .secnote{
-    font-size:9px;letter-spacing:1.5px;color:#7a6e48;text-align:center;
-    text-transform:uppercase;line-height:1.7;
-    background:#e4dcc8;border-radius:4px;padding:8px;border:1px solid #b0a878;
-  }
-
-  /* ── LED legend key ── */
-  .led-key{
-    display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
-    background:#e4dcc8;border-radius:4px;padding:7px 12px;border:1px solid #b0a878;
-  }
+  /* ── LED legend ── */
+  .led-key{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;background:#e4dcc8;border-radius:4px;padding:7px 12px;border:1px solid #b0a878;}
   .lk{display:flex;align-items:center;gap:5px;font-size:8.5px;letter-spacing:1px;color:#5a4e20;text-transform:uppercase;}
   .lk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
   .lk-dot.g  {background:#22cc66;}
@@ -222,22 +136,23 @@
   .lk-dot.off{background:#c8c0a0;border:1px solid #a09870;}
 
   /* ── warning note ── */
-  .wnote{
-    display:flex;align-items:flex-start;gap:9px;
-    background:#fff8e8;border:1.5px solid #e0b050;
-    border-radius:5px;padding:10px 13px;
-  }
+  .wnote{display:flex;align-items:flex-start;gap:9px;background:#fff8e8;border:1.5px solid #e0b050;border-radius:5px;padding:10px 13px;}
   .wicon{flex-shrink:0;margin-top:1px;color:#cc8800;}
   .wtxt{font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.65;color:#7a5010;letter-spacing:.4px;}
-  .wtxt strong{
-    font-weight:bold;display:block;letter-spacing:1.5px;
-    text-transform:uppercase;font-size:9px;margin-bottom:3px;color:#cc8800;
+  .wtxt strong{font-weight:bold;display:block;letter-spacing:1.5px;text-transform:uppercase;font-size:9px;margin-bottom:3px;color:#cc8800;}
+  .kbd{display:inline-block;font-size:9px;font-weight:bold;background:#fff8e8;border:1px solid #e0b050;border-radius:3px;padding:1px 5px;letter-spacing:1px;}
+
+  /* ── PWA install banner ── */
+  .install-banner{
+    display:none;align-items:center;justify-content:space-between;gap:10px;
+    background:#e8f0fe;border:1.5px solid #6090e0;border-radius:5px;
+    padding:9px 13px;margin-bottom:10px;
   }
-  .kbd{
-    display:inline-block;font-size:9px;font-weight:bold;
-    background:#fff8e8;border:1px solid #e0b050;
-    border-radius:3px;padding:1px 5px;letter-spacing:1px;
-  }
+  .install-banner.show{display:flex;}
+  .install-banner-txt{font-size:10px;letter-spacing:.5px;color:#1a3a8a;line-height:1.5;flex:1;}
+  .install-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#3060c0;border:none;border-radius:4px;padding:6px 14px;cursor:pointer;font-weight:bold;white-space:nowrap;}
+  .install-btn:hover{background:#2050a0;}
+  .install-dismiss{background:none;border:none;cursor:pointer;color:#6090e0;font-size:16px;padding:0 4px;line-height:1;}
 </style>
 </head>
 <body>
@@ -253,6 +168,13 @@
         <div class="led" id="l3" title="LED 3 — Security Health"></div>
       </div>
     </div>
+  </div>
+
+  <!-- PWA install prompt (shown when browser supports it) -->
+  <div class="install-banner" id="installBanner">
+    <div class="install-banner-txt">📲 Install Password Generator as an app for quick offline access.</div>
+    <button class="install-btn" onclick="installPWA()">Install</button>
+    <button class="install-dismiss" onclick="dismissInstall()" title="Dismiss">✕</button>
   </div>
 
   <!-- Tile display -->
@@ -305,24 +227,16 @@
 
   <!-- Controls -->
   <div class="ctrl">
-
-    <!-- Length selector -->
     <div class="lsel">
       <button class="sbtn on" id="b12" onclick="setLen(12)">12 · Chars</button>
       <button class="sbtn"    id="b16" onclick="setLen(16)">16 · Chars</button>
     </div>
-
-    <!-- Strength bar -->
     <div class="strwrap">
       <div class="strlbl">Strength</div>
       <div class="strbar"><div class="strfill" id="strfill"></div></div>
       <div class="strval" id="strval">—</div>
     </div>
-
-    <!-- Generate button -->
     <button class="gbtn" id="gbtn" onclick="generate()">▶ Generate Password</button>
-
-    <!-- Copy + Clear -->
     <div class="arow">
       <button class="cpbtn" onclick="copyPw()">⧉ Copy to Clipboard</button>
       <button class="clrbtn" onclick="clearAll()">
@@ -332,16 +246,8 @@
         Clear
       </button>
     </div>
-
-    <!-- Status message -->
     <div class="strow"><div class="stmsg" id="stmsg"></div></div>
-
-    <!-- Security note -->
-    <div class="secnote">
-      No storage · No cookies · No network · Manual wipe button · crypto.getRandomValues()
-    </div>
-
-    <!-- LED legend -->
+    <div class="secnote">No storage · No cookies · No network · Manual wipe button · crypto.getRandomValues()</div>
     <div class="led-key">
       <div class="lk"><div class="lk-dot a"></div> LED 1 — Generating</div>
       <div class="lk"><div class="lk-dot g"></div> LED 2 — Password Ready</div>
@@ -349,8 +255,6 @@
       <div class="lk"><div class="lk-dot r"></div> LED 3 — Error</div>
       <div class="lk"><div class="lk-dot off"></div> Off — Idle / Safe</div>
     </div>
-
-    <!-- Win+V warning -->
     <div class="wnote">
       <svg class="wicon" width="15" height="15" viewBox="0 0 20 20" fill="none">
         <path d="M10 2L2 17h16L10 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
@@ -364,93 +268,124 @@
         Use the &ldquo;Wipe Clipboard Now&rdquo; button after pasting your password.
       </div>
     </div>
-
-  </div><!-- /ctrl -->
-</div><!-- /board -->
+  </div>
+</div>
 
 <script>
   /* ════════════════════════════════════════════
-     Password Generator — v1.0
-     Security features:
-       · crypto.getRandomValues() — no Math.random()
-       · Password masked by default (dots)
+     Password Generator — v1.0.0  (PWA Edition)
+     Security:
+       · crypto.getRandomValues()
+       · Password masked by default
        · Reveal / Hide toggle
-       · Manual clipboard wipe with 45s countdown
-       · LED 1 — Generating indicator
-       · LED 2 — Password ready indicator
-       · LED 3 — Security health (clipboard hot / revealed / error)
-       · No localStorage, sessionStorage, cookies or network calls
+       · Manual clipboard wipe + 45s countdown
+       · LED 1 Generating · LED 2 Ready · LED 3 Security health
+       · No localStorage · No sessionStorage · No cookies · No network
+     PWA:
+       · Service Worker registered for offline support
+       · Web App Manifest linked
+       · Install prompt intercepted and offered to user
   ════════════════════════════════════════════ */
 
-  var pwLen   = 12;
-  var pw      = '';
+  /* ── Service Worker registration ── */
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('/Password-Generator/sw.js', {
+        scope: '/Password-Generator/'
+      }).then(function(reg) {
+        console.log('[App] Service Worker registered, scope:', reg.scope);
+      }).catch(function(err) {
+        console.warn('[App] Service Worker registration failed:', err);
+      });
+    });
+  }
+
+  /* ── PWA install prompt ── */
+  var deferredInstallPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    document.getElementById('installBanner').classList.add('show');
+  });
+
+  function installPWA() {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(result) {
+      console.log('[App] Install prompt result:', result.outcome);
+      deferredInstallPrompt = null;
+      document.getElementById('installBanner').classList.remove('show');
+    });
+  }
+
+  function dismissInstall() {
+    document.getElementById('installBanner').classList.remove('show');
+  }
+
+  window.addEventListener('appinstalled', function() {
+    document.getElementById('installBanner').classList.remove('show');
+    msg('✓ App installed successfully!', '#228844', 3000);
+  });
+
+  /* ── Handle URL params for shortcuts (?len=12 or ?len=16) ── */
+  window.addEventListener('DOMContentLoaded', function() {
+    var params = new URLSearchParams(window.location.search);
+    var len = parseInt(params.get('len'), 10);
+    if (len === 16) { setLen(16); }
+  });
+
+  /* ════════ App logic ════════ */
+
+  var pwLen     = 12;
+  var pw        = '';
   var revealed  = false;
   var clipLive  = false;
-  var errorState  = false;
+  var errorState= false;
   var clipTick  = null;
   var clipSec   = 0;
-  var TOTAL   = 45;
+  var TOTAL     = 45;
 
   var CS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}|;:,.<>?'.split('');
 
-  /* ── Crypto helpers ── */
+  /* ── Crypto ── */
   function rInt(max) {
-    var b = new Uint32Array(1);
-    var lim = Math.floor(0xFFFFFFFF / max) * max;
-    var v;
+    var b = new Uint32Array(1), lim = Math.floor(0xFFFFFFFF / max) * max, v;
     do { crypto.getRandomValues(b); v = b[0]; } while (v >= lim);
     return v % max;
   }
-
   function shuffle(arr) {
     var a = arr.slice(), b = new Uint32Array(a.length), i, j, t;
     crypto.getRandomValues(b);
-    for (i = a.length - 1; i > 0; i--) {
-      j = b[i] % (i + 1); t = a[i]; a[i] = a[j]; a[j] = t;
-    }
+    for (i = a.length - 1; i > 0; i--) { j = b[i] % (i+1); t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
-
   function makePw(len) {
-    var sets = [
-      'abcdefghijklmnopqrstuvwxyz',
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-      '0123456789',
-      '!@#$%^&*()-_=+[]{}|;:,.<>?'
-    ];
+    var sets = ['abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ','0123456789','!@#$%^&*()-_=+[]{}|;:,.<>?'];
     var all = sets.join('');
     var m = sets.map(function(s) { return s[rInt(s.length)]; });
-    var r = [];
-    for (var i = 4; i < len; i++) r.push(all[rInt(all.length)]);
+    var r = []; for (var i = 4; i < len; i++) r.push(all[rInt(all.length)]);
     return shuffle(m.concat(r)).join('');
   }
 
-  /* ── LED helpers ── */
-  function led(id, state) {
-    document.getElementById(id).className = 'led' + (state ? ' ' + state : '');
-  }
+  /* ── LEDs ── */
+  function led(id, state) { document.getElementById(id).className = 'led' + (state ? ' '+state : ''); }
 
-  /* LED 3 — single source of truth
-     Priority: red (error) > amber (clipboard hot OR revealed) > off */
   function refreshLed3() {
     if (errorState) {
-      led('l3', 'red');
-      showBanner('red', 'Security Error',
-        'A clipboard operation failed. Please clear your clipboard manually.');
+      led('l3','red');
+      showBanner('red','Security Error','A clipboard operation failed. Please clear your clipboard manually.');
     } else if (clipLive && revealed) {
-      led('l3', 'amber');
-      showBanner('amber', 'Password Visible + Clipboard Hot',
-        'Your password is both visible on screen AND still in the clipboard. Mask it and wipe when done.');
+      led('l3','amber');
+      showBanner('amber','Password Visible + Clipboard Hot','Your password is both visible on screen AND still in the clipboard. Mask it and wipe when done.');
     } else if (clipLive) {
-      led('l3', 'amber');
-      showBanner('amber', 'Clipboard Hot',
-        'Your password is still in the clipboard. Click "Wipe Clipboard Now" after pasting.');
+      led('l3','amber');
+      showBanner('amber','Clipboard Hot','Your password is still in the clipboard. Click "Wipe Clipboard Now" after pasting.');
     } else if (revealed) {
-      led('l3', 'amber');
-      showBanner('amber', 'Password Visible',
-        'Your password is unmasked on screen — shoulder surfing risk. Click Hide when done.');
+      led('l3','amber');
+      showBanner('amber','Password Visible','Your password is unmasked on screen — shoulder surfing risk. Click Hide when done.');
     } else {
-      led('l3', '');
+      led('l3','');
       hideBanner();
     }
   }
@@ -461,47 +396,37 @@
     document.getElementById('bannertitle').textContent = title;
     document.getElementById('bannerbody').textContent  = body;
   }
-  function hideBanner() {
-    document.getElementById('secbanner').classList.remove('show');
-  }
+  function hideBanner() { document.getElementById('secbanner').classList.remove('show'); }
 
-  /* ── Tile rendering ── */
+  /* ── Tiles ── */
   function renderTiles(n) {
-    var row = document.getElementById('trow');
-    row.innerHTML = '';
+    var row = document.getElementById('trow'); row.innerHTML = '';
     for (var i = 0; i < n; i++) {
       var d = document.createElement('div');
-      d.className = 'tile'; d.id = 't' + i;
-      d.innerHTML = '<div class="th"><span class="tc">·</span></div>'
-                  + '<div class="tb"><span class="tb2">·</span></div>';
+      d.className = 'tile'; d.id = 't'+i;
+      d.innerHTML = '<div class="th"><span class="tc">·</span></div><div class="tb"><span class="tb2">·</span></div>';
       row.appendChild(d);
     }
   }
-
   function setTile(i, c, mask) {
-    var d = document.getElementById('t' + i);
-    if (!d) return;
+    var d = document.getElementById('t'+i); if (!d) return;
     var ch = mask ? '●' : c;
     d.className = 'tile' + (mask ? ' masked' : '');
     d.querySelector('.tc').textContent  = ch;
     d.querySelector('.tb2').textContent = ch;
   }
+  function maskAll(mask) { if (pw) for (var i = 0; i < pw.length; i++) setTile(i, pw[i], mask); }
 
-  function maskAll(mask) {
-    if (pw) for (var i = 0; i < pw.length; i++) setTile(i, pw[i], mask);
-  }
-
-  /* ── Reveal toggle ── */
+  /* ── Reveal ── */
   function toggleReveal() {
-    revealed = !revealed;
-    maskAll(!revealed);
-    document.getElementById('rlbl').textContent = revealed ? 'Hide' : 'Reveal';
+    revealed = !revealed; maskAll(!revealed);
+    document.getElementById('rlbl').textContent  = revealed ? 'Hide'   : 'Reveal';
     document.getElementById('stk').style.display = revealed ? 'none'   : 'block';
     document.getElementById('pup').style.display = revealed ? 'inline' : 'none';
     refreshLed3();
   }
 
-  /* ── Status message ── */
+  /* ── Status msg ── */
   function msg(txt, col, dur) {
     var e = document.getElementById('stmsg');
     e.textContent = txt; e.style.color = col || '#228844';
@@ -518,15 +443,13 @@
     var wbtn  = document.getElementById('wipebtn');
     card.className = 'clipcard show ' + state;
     if (state === 'live') {
-      title.textContent = 'Password is in your clipboard';
-      body.textContent  = 'Go paste it now. Come back and click "Wipe Clipboard Now" once done.';
-      timer.style.display = 'flex';
-      wbtn.style.display  = 'flex';
+      title.textContent   = 'Password is in your clipboard';
+      body.textContent    = 'Go paste it now. Come back and click "Wipe Clipboard Now" once done.';
+      timer.style.display = 'flex'; wbtn.style.display = 'flex';
     } else {
-      title.textContent = 'Clipboard wiped ✓';
-      body.textContent  = 'Your clipboard has been cleared. The password is no longer pasteable.';
-      timer.style.display = 'none';
-      wbtn.style.display  = 'none';
+      title.textContent   = 'Clipboard wiped ✓';
+      body.textContent    = 'Your clipboard has been cleared. The password is no longer pasteable.';
+      timer.style.display = 'none'; wbtn.style.display = 'none';
       setTimeout(function() { card.classList.remove('show'); }, 4000);
     }
   }
@@ -537,44 +460,31 @@
     if (clipTick) { clearInterval(clipTick); clipTick = null; }
     clipLive = false; clipSec = 0;
   }
-
   function startTimer() {
-    stopTimer();
-    clipLive = true; clipSec = TOTAL;
-    showClipCard('live');
-    updateTimerDisplay();
-    refreshLed3();
+    stopTimer(); clipLive = true; clipSec = TOTAL;
+    showClipCard('live'); updateTimerDisplay(); refreshLed3();
     clipTick = setInterval(function() {
       clipSec--;
       if (clipSec <= 0) {
         stopTimer();
         document.getElementById('clipsecs').textContent = '!';
         document.getElementById('clipfill').style.width = '0%';
-        document.getElementById('clipcardbody').textContent =
-          '45 seconds have passed. Please click "Wipe Clipboard Now" to clear it.';
+        document.getElementById('clipcardbody').textContent = '45 seconds have passed. Please click "Wipe Clipboard Now" to clear it.';
         refreshLed3();
-      } else {
-        updateTimerDisplay();
-      }
+      } else { updateTimerDisplay(); }
     }, 1000);
   }
-
   function updateTimerDisplay() {
     document.getElementById('clipsecs').textContent    = clipSec;
     document.getElementById('clipfill').style.width = ((clipSec / TOTAL) * 100) + '%';
   }
 
-  /* ── Clipboard wipe ── */
+  /* ── Wipe ── */
   function manualWipe() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText('').then(function() {
-        onWipeSuccess();
-      }).catch(function() { legacyWipe(); });
-    } else {
-      legacyWipe();
-    }
+      navigator.clipboard.writeText('').then(onWipeSuccess).catch(legacyWipe);
+    } else { legacyWipe(); }
   }
-
   function legacyWipe() {
     try {
       var ta = document.createElement('textarea');
@@ -583,20 +493,16 @@
       document.execCommand('copy'); document.body.removeChild(ta);
       onWipeSuccess();
     } catch(e) {
-      errorState = true;
-      refreshLed3();
+      errorState = true; refreshLed3();
       msg('Could not wipe — please clear clipboard manually', '#ee3333', 5000);
     }
   }
-
   function onWipeSuccess() {
     stopTimer(); errorState = false;
-    showClipCard('safe');
-    refreshLed3();
+    showClipCard('safe'); refreshLed3();
     msg('✓ Clipboard wiped successfully!', '#228844', 3500);
   }
 
-  /* Attempt wipe on tab/window close */
   window.addEventListener('beforeunload', function() {
     if (clipLive) {
       try {
@@ -609,13 +515,11 @@
     }
   });
 
-  /* ── Async sleep ── */
+  /* ── Generate ── */
   var sleep = function(ms) { return new Promise(function(r) { setTimeout(r, ms); }); };
 
-  /* ── Generate ── */
   async function generate() {
-    var btn = document.getElementById('gbtn');
-    btn.disabled = true;
+    var btn = document.getElementById('gbtn'); btn.disabled = true;
     if (clipLive) { manualWipe(); }
     stopTimer(); hideClipCard();
     errorState = false; revealed = false;
@@ -623,72 +527,66 @@
     document.getElementById('rlbl').textContent   = 'Reveal';
     document.getElementById('stk').style.display  = 'block';
     document.getElementById('pup').style.display  = 'inline';
-    led('l1', 'amber'); led('l2', ''); refreshLed3();
+    led('l1','amber'); led('l2',''); refreshLed3();
     pw = ''; renderTiles(pwLen);
     var p = makePw(pwLen);
     for (var i = 0; i < pwLen; i++) {
       for (var r = 0; r < 8; r++) { await sleep(32); setTile(i, CS[rInt(CS.length)], false); }
       await sleep(32); setTile(i, p[i], false);
     }
-    await sleep(180);
-    pw = p; maskAll(true);
-    document.getElementById('rbtn').style.display = 'flex';
-    btn.disabled = false;
-    var sets   = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^A-Za-z0-9]/];
+    await sleep(180); pw = p; maskAll(true);
+    document.getElementById('rbtn').style.display = 'flex'; btn.disabled = false;
+    var sets   = [/[a-z]/,/[A-Z]/,/[0-9]/,/[^A-Za-z0-9]/];
     var score  = sets.filter(function(rx) { return rx.test(p); }).length + (p.length >= 16 ? 1 : 0);
-    var labels = ['', 'Weak', 'Fair', 'Good', 'Strong', 'Very Strong'];
+    var labels = ['','Weak','Fair','Good','Strong','Very Strong'];
     var colors = ['#e04040','#e08020','#e0c020','#80c020','#22cc66'];
-    document.getElementById('strfill').style.width      = [0,20,40,65,85,100][score] + '%';
-    document.getElementById('strfill').style.background = colors[Math.min(score - 1, 4)];
-    document.getElementById('strval').textContent       = labels[score] || 'Good';
-    led('l1', ''); led('l2', 'green'); refreshLed3();
+    document.getElementById('strfill').style.width      = [0,20,40,65,85,100][score]+'%';
+    document.getElementById('strfill').style.background = colors[Math.min(score-1,4)];
+    document.getElementById('strval').textContent       = labels[score]||'Good';
+    led('l1',''); led('l2','green'); refreshLed3();
   }
 
   /* ── Copy ── */
   async function copyPw() {
-    if (!pw) { msg('Generate a password first', '#cc6600'); return; }
+    if (!pw) { msg('Generate a password first','#cc6600'); return; }
     try { await navigator.clipboard.writeText(pw); }
     catch(e) {
       var ta = document.createElement('textarea');
       ta.value = pw; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy'); document.body.removeChild(ta);
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
     }
-    msg('✓ Copied! Paste it, then wipe.', '#228844', 3000);
+    msg('✓ Copied! Paste it, then wipe.','#228844',3000);
     startTimer();
   }
 
-  /* ── Clear all ── */
+  /* ── Clear ── */
   function clearAll() {
     if (clipLive) { manualWipe(); }
     pw = ''; revealed = false; errorState = false;
-    stopTimer(); hideClipCard();
-    renderTiles(pwLen);
+    stopTimer(); hideClipCard(); renderTiles(pwLen);
     document.getElementById('rbtn').style.display = 'none';
     document.getElementById('rlbl').textContent   = 'Reveal';
     document.getElementById('stk').style.display  = 'block';
     document.getElementById('pup').style.display  = 'inline';
     document.getElementById('strfill').style.width = '0%';
     document.getElementById('strval').textContent  = '—';
-    led('l1', ''); led('l2', ''); refreshLed3();
+    led('l1',''); led('l2',''); refreshLed3();
   }
 
   /* ── Set length ── */
   function setLen(n) {
     pwLen = n;
-    document.getElementById('b12').className = 'sbtn' + (n === 12 ? ' on' : '');
-    document.getElementById('b16').className = 'sbtn' + (n === 16 ? ' on' : '');
+    document.getElementById('b12').className = 'sbtn' + (n===12?' on':'');
+    document.getElementById('b16').className = 'sbtn' + (n===16?' on':'');
     pw = ''; revealed = false;
-    stopTimer(); hideClipCard();
-    renderTiles(pwLen);
+    stopTimer(); hideClipCard(); renderTiles(pwLen);
     document.getElementById('rbtn').style.display = 'none';
     document.getElementById('rlbl').textContent   = 'Reveal';
     document.getElementById('stk').style.display  = 'block';
     document.getElementById('pup').style.display  = 'inline';
     document.getElementById('strfill').style.width = '0%';
     document.getElementById('strval').textContent  = '—';
-    led('l1', ''); led('l2', ''); refreshLed3();
-    /* No wipe, no message — clipboard untouched when just switching length */
+    led('l1',''); led('l2',''); refreshLed3();
   }
 
   /* ── Init ── */
