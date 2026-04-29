@@ -1,6 +1,6 @@
 {
-  "name": "Password Generator",
-  "short_name": "PassGen",
+  "name": "PasswordGenerator-SolariStyle",
+  "short_name": "PasswordGenerator-SolariStyle",
   "description": "Secure Solari-style password generator with clipboard protection. Generates cryptographically strong 12 or 16 character passwords with no storage, no cookies and no network calls.",
   "start_url": "/Password-Generator/",
   "scope": "/Password-Generator/",
