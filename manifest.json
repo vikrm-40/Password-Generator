@@ -1,31 +1,36 @@
 {
   "name": "Password Generator - Solari Style",
   "short_name": "Password Generator - Solari Style",
-  "description": "Secure Solari-style password generator with clipboard protection. Generates cryptographically strong 12 or 16 character passwords with no storage, no cookies and no network calls.",
-  "start_url": "/Password-Generator/",
-  "scope": "/Password-Generator/",
+  "description": "Offline-capable password generator with cryptographic randomness and manual clipboard clearing.",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
-  "background_color": "#d8d0bc",
-  "theme_color": "#7a5c10",
+  "display_override": [
+    "window-controls-overlay",
+    "standalone"
+  ],
+  "background_color": "#f7f0d4",
+  "theme_color": "#1e694e",
   "orientation": "portrait-primary",
   "lang": "en-US",
   "dir": "ltr",
-  "categories": ["utilities", "productivity", "security"],
-
+  "categories": [
+    "utilities",
+    "productivity",
+    "security"
+  ],
   "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-
   "prefer_related_applications": false,
   "related_applications": [],
-
   "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
+    "client_mode": [
+      "navigate-existing",
+      "auto"
+    ]
   },
-
   "edge_side_panel": {
     "preferred_width": 400
   },
-
   "icons": [
     {
       "src": "icons/icon-48.png",
@@ -70,42 +75,48 @@
       "purpose": "any maskable"
     }
   ],
-
   "screenshots": [
     {
       "src": "screenshots/screen-wide.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Password Generator — desktop view"
+      "label": "Password Generator \u2014 desktop view"
     },
     {
       "src": "screenshots/screen-narrow.png",
       "sizes": "640x1136",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Password Generator — mobile view"
+      "label": "Password Generator \u2014 mobile view"
     }
   ],
-
   "shortcuts": [
     {
       "name": "Generate 12-char Password",
       "short_name": "12 Chars",
       "description": "Quickly generate a 12-character password",
       "url": "/Password-Generator/?len=12",
-      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "Generate 16-char Password",
       "short_name": "16 Chars",
       "description": "Quickly generate a 16-character password",
       "url": "/Password-Generator/?len=16",
-      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "icons/icon-96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
-
   "protocol_handlers": [],
-
   "share_target": null
 }
