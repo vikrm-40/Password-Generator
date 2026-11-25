@@ -1,0 +1,1 @@
+{"desktop-main":{"identifier":"desktop-main","description":"Local desktop clipboard operations only","local":true,"windows":["main"],"permissions":["core:default","clipboard-manager:allow-read-text","clipboard-manager:allow-write-text"]}}

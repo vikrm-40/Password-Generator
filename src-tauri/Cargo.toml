@@ -1,0 +1,17 @@
+[package]
+name = "password_generator_desktop"
+version = "2.0.2"
+description = "Offline password generator desktop edition"
+authors = ["Password Generator contributors"]
+edition = "2021"
+
+[lib]
+name = "password_generator_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="description" content="Secure Solari-style password generator. Generates cryptographically strong passwords with no storage, no cookies and no network calls."/>
+<meta name="theme-color" content="#1e694e"/>
+
+
+
+
+
+<title>Password Generator</title>
+
+<style>
+  /* System fonts only: no external network dependency. */
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:#d8d0bc;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 12px;
+    font-family:'Share Tech Mono','Courier New',monospace;
+  }
+
+  .board{
+    background:#f0ece0;border-radius:10px;border:3px solid #b0a880;
+    padding:22px 20px 20px;width:100%;max-width:680px;
+  }
+
+  /* ── header ── */
+  .hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:2px solid #b0a880;}
+  .brand{font-size:13px;letter-spacing:3px;color:#5a4e20;text-transform:uppercase;font-weight:bold;}
+  .hright{display:flex;align-items:center;gap:12px;}
+  .leds{display:flex;gap:6px;align-items:center;}
+  .led{width:9px;height:9px;border-radius:50%;background:#c8c0a0;border:1px solid #a09870;transition:background .3s,box-shadow .3s;}
+  .led.green{background:#22cc66;box-shadow:0 0 6px #22cc66;}
+  .led.amber{background:#ffaa00;box-shadow:0 0 6px #ffaa00;}
+  .led.red  {background:#ee3333;box-shadow:0 0 7px #ee3333;}
+
+  /* ── tiles ── */
+  .dlabel{font-size:9px;letter-spacing:3px;color:#7a6e48;text-align:center;margin-bottom:8px;text-transform:uppercase;}
+  .trow{display:flex;gap:3px;justify-content:center;margin-bottom:6px;flex-wrap:nowrap;}
+  .tile{width:34px;height:50px;background:#1a1810;border-radius:3px;border:1px solid rgba(0,0,0,.4);position:relative;overflow:hidden;flex-shrink:0;}
+  .tile::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.7);z-index:2;}
+  .th{position:absolute;top:0;left:0;right:0;height:50%;background:#252210;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;border-radius:3px 3px 0 0;}
+  .tb{position:absolute;bottom:0;left:0;right:0;height:50%;background:#1a1810;display:flex;align-items:flex-start;justify-content:center;overflow:hidden;border-radius:0 0 3px 3px;}
+  .tc {font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:bold;color:#f5f0d0;line-height:1;transform:translateY(50%);display:block;}
+  .tb2{font-family:'Share Tech Mono',monospace;font-size:19px;font-weight:bold;color:#f5f0d0;line-height:1;transform:translateY(-50%);display:block;}
+  .tile.masked .tc,.tile.masked .tb2{color:#e8a020;font-size:22px;}
+
+  /* ── reveal row ── */
+  .rrow{display:flex;align-items:center;justify-content:center;gap:10px;min-height:28px;margin-bottom:4px;}
+  .rbtn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#5a4e20;background:#e8e0cc;border:1.5px solid #a09060;border-radius:4px;padding:5px 14px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:6px;}
+  .rbtn:hover{background:#d8d0b8;}
+
+  /* ── security banner (LED 3) ── */
+  .sec-banner{display:none;border-radius:5px;padding:8px 12px;margin-bottom:10px;font-size:10px;letter-spacing:.5px;line-height:1.6;border:1.5px solid;}
+  .sec-banner.show{display:flex;align-items:flex-start;gap:8px;}
+  .sec-banner.amber-band{background:#fffbe6;border-color:#e0b030;color:#7a5000;}
+  .sec-banner.red-band  {background:#fff0f0;border-color:#e05050;color:#7a1010;}
+  .sec-banner svg{flex-shrink:0;margin-top:1px;}
+  .sec-banner-txt{flex:1;}
+  .sec-banner-title{font-weight:bold;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;}
+
+  /* ── clipboard card ── */
+  .clipcard{display:none;border-radius:6px;padding:12px 14px;margin-bottom:10px;border:1.5px solid;}
+  .clipcard.show{display:block;}
+  .clipcard.safe{background:#e8f8ee;border-color:#60b878;}
+  .clipcard.live{background:#fff8e0;border-color:#e0a030;}
+  .clipcard-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .clipcard-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .clipcard.safe .clipcard-dot{background:#228844;}
+  .clipcard.live .clipcard-dot{background:#cc7700;animation:blink 1s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  .clipcard-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-weight:bold;}
+  .clipcard.safe .clipcard-title{color:#228844;}
+  .clipcard.live .clipcard-title{color:#cc7700;}
+  .clipcard-body{font-size:10px;line-height:1.7;letter-spacing:.3px;}
+  .clipcard.safe .clipcard-body{color:#1a5a30;}
+  .clipcard.live .clipcard-body{color:#7a4800;}
+  .clipcard-timer{display:flex;align-items:center;gap:10px;margin-top:8px;}
+  .clipcard-secs{font-size:22px;font-weight:bold;color:#cc7700;width:44px;flex-shrink:0;line-height:1;}
+  .clipcard-timer-right{flex:1;}
+  .clipcard-timer-label{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:#7a4800;margin-bottom:4px;opacity:.8;}
+  .clipbar{height:5px;background:rgba(0,0,0,.1);border-radius:3px;overflow:hidden;}
+  .clipfill{height:100%;background:#cc7700;border-radius:3px;transition:width 1s linear;}
+  .wipebtn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a3010;background:#fff0e0;border:1.5px solid #e07030;border-radius:4px;padding:7px 16px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:7px;margin-top:10px;width:100%;justify-content:center;}
+  .wipebtn:hover{background:#ffe0c8;}
+  .wipebtn:active{transform:scale(.98);}
+
+  /* ── controls ── */
+  .ctrl{margin-top:14px;padding-top:14px;border-top:2px solid #b0a880;display:flex;flex-direction:column;gap:10px;}
+  .lsel{display:flex;gap:10px;justify-content:center;}
+  .sbtn{font-family:'Share Tech Mono',monospace;font-size:13px;letter-spacing:2px;color:#5a4e20;background:#e0d8c0;border:2px solid #a09060;border-radius:4px;padding:9px 28px;cursor:pointer;text-transform:uppercase;font-weight:bold;transition:all .2s;outline:none;}
+  .sbtn.on{color:#fff;background:#7a5c10;border-color:#5a3c08;}
+  .sbtn:hover:not(.on){opacity:.75;}
+  .strwrap{display:flex;align-items:center;gap:10px;background:#e4dcc8;border-radius:4px;padding:8px 12px;border:1px solid #b0a878;}
+  .strlbl{font-size:10px;letter-spacing:2px;color:#5a4e20;text-transform:uppercase;width:58px;flex-shrink:0;font-weight:bold;}
+  .strbar{flex:1;height:6px;background:#c8c0a8;border-radius:3px;overflow:hidden;}
+  .strfill{height:100%;width:0%;background:#22cc66;transition:width .5s,background .5s;border-radius:3px;}
+  .strval{font-size:10px;letter-spacing:1px;color:#5a4e20;width:70px;text-align:right;text-transform:uppercase;flex-shrink:0;font-weight:bold;}
+  .gbtn{font-family:'Share Tech Mono',monospace;font-size:14px;letter-spacing:3px;text-transform:uppercase;color:#fff;background:#7a5c10;border:2px solid #5a3c08;border-radius:4px;padding:13px 0;cursor:pointer;width:100%;font-weight:bold;transition:all .15s;outline:none;}
+  .gbtn:hover{background:#9a7418;}
+  .gbtn:active{transform:scale(.98);}
+  .gbtn:disabled{opacity:.45;cursor:not-allowed;}
+  .arow{display:flex;gap:10px;}
+  .cpbtn{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#3a5a20;background:#d8ecc8;border:2px solid #80aa50;border-radius:4px;padding:10px 0;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;flex:1;}
+  .cpbtn:hover{background:#c0e0a8;}
+  .clrbtn{font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#8b2020;background:#fce8e8;border:2px solid #e08080;border-radius:4px;padding:10px 16px;cursor:pointer;font-weight:bold;transition:all .15s;outline:none;display:flex;align-items:center;gap:6px;}
+  .clrbtn:hover{background:#f8d0d0;}
+  .strow{display:flex;align-items:center;justify-content:center;min-height:18px;}
+  .stmsg{font-size:11px;letter-spacing:2px;color:#228844;opacity:0;transition:opacity .3s;text-transform:uppercase;font-weight:bold;}
+  .stmsg.show{opacity:1;}
+  .secnote{font-size:9px;letter-spacing:1.5px;color:#7a6e48;text-align:center;text-transform:uppercase;line-height:1.7;background:#e4dcc8;border-radius:4px;padding:8px;border:1px solid #b0a878;}
+
+  /* ── LED legend ── */
+  .led-key{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;background:#e4dcc8;border-radius:4px;padding:7px 12px;border:1px solid #b0a878;}
+  .lk{display:flex;align-items:center;gap:5px;font-size:8.5px;letter-spacing:1px;color:#5a4e20;text-transform:uppercase;}
+  .lk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .lk-dot.g  {background:#22cc66;}
+  .lk-dot.a  {background:#ffaa00;}
+  .lk-dot.r  {background:#ee3333;}
+  .lk-dot.off{background:#c8c0a0;border:1px solid #a09870;}
+
+  /* ── warning note ── */
+  .wnote{display:flex;align-items:flex-start;gap:9px;background:#fff8e8;border:1.5px solid #e0b050;border-radius:5px;padding:10px 13px;}
+  .wicon{flex-shrink:0;margin-top:1px;color:#cc8800;}
+  .wtxt{font-family:'Share Tech Mono',monospace;font-size:10px;line-height:1.65;color:#7a5010;letter-spacing:.4px;}
+  .wtxt strong{font-weight:bold;display:block;letter-spacing:1.5px;text-transform:uppercase;font-size:9px;margin-bottom:3px;color:#cc8800;}
+  .kbd{display:inline-block;font-size:9px;font-weight:bold;background:#fff8e8;border:1px solid #e0b050;border-radius:3px;padding:1px 5px;letter-spacing:1px;}
+
+  /* ── PWA install banner ── */
+  .install-banner{
+    display:none;align-items:center;justify-content:space-between;gap:10px;
+    background:#e8f0fe;border:1.5px solid #6090e0;border-radius:5px;
+    padding:9px 13px;margin-bottom:10px;
+  }
+  .install-banner.show{display:flex;}
+  .install-banner-txt{font-size:10px;letter-spacing:.5px;color:#1a3a8a;line-height:1.5;flex:1;}
+  .install-btn{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#fff;background:#3060c0;border:none;border-radius:4px;padding:6px 14px;cursor:pointer;font-weight:bold;white-space:nowrap;}
+  .install-btn:hover{background:#2050a0;}
+  .install-dismiss{background:none;border:none;cursor:pointer;color:#6090e0;font-size:16px;padding:0 4px;line-height:1;}
+
+/* Modern reference-inspired skin — CSS overrides keep original logic intact */
+:root{color-scheme:light;--forest:#1e694e;--deep:#14533d;--cream:#f7f0d4;--ink:#174d3b;--sage:#d1e0da;--muted:#5f8778;--blue:#b1c6e4}
+html{min-width:320px}body{min-height:100vh;display:block;padding:0;background:linear-gradient(117deg,#f7f0d5 0 48%,#1e694e 48% 100%);font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--ink)}
+.app-shell{max-width:1120px;margin:0 auto;padding:clamp(24px,6vh,62px) 20px}
+.board{max-width:none;width:100%;padding:0;border:0;background:transparent;display:grid;grid-template-columns:minmax(0,1.9fr) minmax(260px,.88fr);align-items:stretch;gap:22px;box-shadow:none}
+.work-panel,.info-panel{border:1px solid rgba(255,255,255,.7);border-radius:34px;background:rgba(255,255,255,.78);box-shadow:0 18px 48px rgba(23,53,42,.09);padding:24px 22px 28px;min-width:0;backdrop-filter:blur(12px)}
+.info-panel{background:#d2e0da;padding:38px 22px 30px;display:flex;flex-direction:column;gap:20px}
+.hdr{border:0;background:#fff;border-radius:999px;padding:19px 22px;margin-bottom:20px;box-shadow:0 6px 17px rgba(32,67,54,.1)}
+.brand{font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--forest);font-size:20px;letter-spacing:-.8px;text-transform:none;font-weight:750}
+.leds{background:#f7f0d4;padding:8px 12px;border-radius:999px}.led{width:10px;height:10px;border:0;background:#dcd2a6}.led.green{background:#206a50;box-shadow:0 0 5px #206a50}.led.amber{background:#e2a632;box-shadow:0 0 5px #e2a632}.led.red{background:#c34d41}
+.dlabel{text-align:left;margin:0 6px 11px;color:#4d826e;font-family:Consolas,'Courier New',monospace;font-weight:bold;font-size:10px;letter-spacing:2.5px}
+.password-well{background:#fff;border-radius:28px;padding:18px 12px;min-height:90px;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 16px rgba(26,67,48,.1)}
+.trow{margin:0;gap:4px;max-width:100%;flex-wrap:nowrap}.tile{width:clamp(14px,2vw,26px);height:44px;background:#1b694e;border:0;border-radius:9px;box-shadow:0 3px 5px rgba(10,56,39,.13)}.th{background:#258164;border-radius:9px 9px 0 0}.tb{background:#1b694e;border-radius:0 0 9px 9px}.tc,.tb2{font-family:Consolas,'Courier New',monospace;color:#fff;font-size:14px}.tile.masked .tc,.tile.masked .tb2{color:#fff;font-size:13px}.tile::after{background:rgba(255,255,255,.3)}
+.rrow{margin:8px 0 5px;min-height:24px}.rbtn{border:0;border-radius:999px;background:#fff;color:#1e694e;padding:7px 16px;font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:12px;letter-spacing:0;text-transform:none}
+.ctrl{margin:12px 0 0;border:0;padding:0;gap:12px}.lsel{display:flex;gap:0;background:#f7f0d4;padding:7px;border-radius:999px}.sbtn{flex:1;min-width:0;border:0;border-radius:999px;padding:13px 10px;background:transparent;color:#508874;font-family:Consolas,'Courier New',monospace;font-size:12px;letter-spacing:0;text-transform:none}.sbtn.on{background:#1e694e;color:#fff;box-shadow:0 3px 5px #164f3b33}
+.strwrap{background:#fff;border:0;border-radius:999px;padding:15px 19px;min-height:48px}.strlbl,.strval{font-family:Consolas,'Courier New',monospace;font-size:10px;letter-spacing:1.4px;color:#578674}.strlbl{width:66px}.strval{width:80px}.strbar{background:#ebe3c2}.strfill{background:#1e694e!important}
+.gbtn{font-family:Inter,'Segoe UI',Arial,sans-serif;letter-spacing:-.2px;font-size:16px;text-transform:none;border:0;border-radius:999px;background:#1e694e;padding:18px 12px;box-shadow:0 4px 7px #15503d20}.gbtn:hover{background:#15563e}.gbtn:disabled{opacity:.6}
+.arow{gap:10px}.cpbtn,.clrbtn{font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:13px;letter-spacing:0;text-transform:none;border:0;border-radius:999px;min-height:49px}.cpbtn{color:#315c88;background:#b1c6e4}.cpbtn:hover{background:#a1bcde}.cpbtn:disabled{opacity:.6;cursor:not-allowed}.clrbtn{background:#fff;color:#4f8773;padding:11px 21px}.clrbtn:hover{background:#ecf5ef}
+.strow{min-height:22px}.stmsg{font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:12px;letter-spacing:0;text-transform:none}
+.info-heading{font-family:Consolas,'Courier New',monospace;text-align:center;text-transform:uppercase;letter-spacing:3px;font-size:11px;color:#507d6d;margin:0}
+.privacy-line{font-family:Consolas,'Courier New',monospace;color:#608d7b;font-size:11px;line-height:1.8;text-align:center;letter-spacing:.3px}
+.read-guide{display:block;text-decoration:none;background:#fff;padding:16px 18px;border-radius:999px;color:#276f54;font-weight:650;font-family:Consolas,'Courier New',monospace;font-size:11px;line-height:1.4;box-shadow:0 4px 10px #194b3920}.read-guide:hover{text-decoration:underline}
+.secnote{font-family:Consolas,'Courier New',monospace;font-size:11px;letter-spacing:.2px;text-transform:none;line-height:1.8;color:#508371;border:0;background:transparent;padding:0;text-align:center}
+.led-key{display:grid;grid-template-columns:1fr;gap:10px;background:none;border:0;padding:0 12px}.lk{font-family:Consolas,'Courier New',monospace;text-transform:none;letter-spacing:.1px;font-size:10px;color:#578370}.lk-dot.g{background:#1e694e}.lk-dot.a{background:#dda035}.lk-dot.r{background:#c94e46}
+.wnote{border:0;background:#f7f0d4;border-radius:24px;padding:18px;gap:12px}.wicon{color:#c68c22}.wtxt{font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:12px;letter-spacing:0;color:#578171;line-height:1.65}.wtxt strong{font-family:Inter,'Segoe UI',Arial,sans-serif;font-size:13px;color:#20533e;text-transform:none;letter-spacing:0}.kbd{font-size:11px;background:white;border:0}
+.sec-banner,.clipcard{border-radius:17px;padding:12px 15px;font-family:Inter,'Segoe UI',Arial,sans-serif;letter-spacing:0}.sec-banner-title,.clipcard-title{font-size:12px;letter-spacing:0;text-transform:none}.clipcard-body{font-size:12px;letter-spacing:0}.wipebtn{font-family:Inter,'Segoe UI',Arial,sans-serif;letter-spacing:0;text-transform:none;border-radius:999px}
+.install-banner{border:0;border-radius:18px}.install-btn{border-radius:999px}
+button{touch-action:manipulation}button:focus-visible,a:focus-visible{outline:3px solid #d39c2c!important;outline-offset:3px!important}
+@media (max-width:780px){body{background:linear-gradient(155deg,#f7f0d5 0 45%,#1e694e 45% 100%)}.app-shell{padding:20px 12px 40px}.board{grid-template-columns:1fr;gap:16px}.work-panel,.info-panel{border-radius:26px;padding:18px}.info-panel{gap:15px}.brand{font-size:18px}.password-well{padding:14px 8px}.tile{width:clamp(13px,4.4vw,26px)}.info-panel{padding:25px 20px}}
+@media (max-width:390px){.brand{font-size:16px}.hdr{padding:16px}.tile{width:clamp(12px,4vw,18px);height:38px}.tc,.tb2{font-size:12px}.trow{gap:3px}.password-well{padding:12px 5px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* Optional customization, designed to match the existing cream / forest-green UI. */
+.advanced{background:#fff;border-radius:22px;padding:0 18px;color:#235b45;font-family:Inter,'Segoe UI',Arial,sans-serif}
+.advanced summary{cursor:pointer;padding:15px 2px;font-weight:650;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:8px;list-style-position:inside}
+.advanced summary::marker{color:#236f54}
+.advanced-hint{font-family:Consolas,'Courier New',monospace;font-size:10px;font-weight:normal;color:#658b7d}
+.advanced-body{border-top:1px solid #e5ece7;padding:16px 2px 18px}
+.setting-title{display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:12px;margin-bottom:11px;color:#245f49}
+#lengthValue{background:#e8f1ea;padding:6px 12px;border-radius:999px;color:#1e694e;font-size:13px}
+#customLength{width:100%;accent-color:#1e694e;cursor:pointer;min-height:25px}
+.setting-range{display:flex;justify-content:space-between;color:#729184;font-size:11px;margin:3px 0 17px}
+.char-options{border:0;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.char-options legend{margin-bottom:11px}
+.char-options label{display:flex;align-items:center;gap:8px;font-size:12px;line-height:1.5;cursor:pointer}
+.char-options input{width:17px;height:17px;accent-color:#1e694e;flex-shrink:0}
+.option-help{font-size:11px;line-height:1.5;color:#638577;margin-top:14px}
+.password-well{overflow:hidden}.trow{flex-wrap:wrap;max-width:100%}.tile{width:clamp(16px,2.2vw,26px)}
+button:focus-visible,a:focus-visible,summary:focus-visible,input:focus-visible{outline:3px solid #c98c1f!important;outline-offset:3px!important}
+@media(max-width:450px){.char-options{grid-template-columns:1fr 1fr;gap:10px 5px}.char-options label{font-size:11px}.tile{width:18px;height:36px}}
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <main class="board" aria-label="Password generator">
+    <section class="work-panel" aria-label="Password creation controls">
+  <!-- Header -->
+  <div class="hdr">
+    <div class="brand">Password Generator</div>
+    <div class="hright">
+      <div class="leds">
+        <div class="led" id="l1" title="LED 1 — Generating" role="img" aria-label="Generation indicator"></div>
+        <div class="led" id="l2" title="LED 2 — Password Ready" role="img" aria-label="Ready indicator"></div>
+        <div class="led" id="l3" title="LED 3 — Security Health" role="img" aria-label="Clipboard and visibility warning indicator"></div>
+      </div>
+    </div>
+  </div>
+
+
+      <div class="dlabel">Generated password</div>
+      <div class="password-well">
+        <div class="trow" id="trow" role="group" aria-label="Password hidden until revealed"></div>
+      </div>
+  <!-- Reveal button -->
+  <div class="rrow">
+    <button class="rbtn" id="rbtn"  aria-pressed="false" style="display:none">
+      <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+        <path d="M10 4C5.5 4 2 10 2 10s3.5 6 8 6 8-6 8-6-3.5-6-8-6z" stroke="currentColor" stroke-width="1.5"/>
+        <circle id="pup" cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+        <line id="stk" x1="4" y1="16" x2="16" y2="4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" style="display:none"/>
+      </svg>
+      <span id="rlbl">Reveal</span>
+    </button>
+  </div>
+
+  <!-- Security health banner (LED 3) -->
+  <div class="sec-banner" id="secbanner">
+    <svg width="14" height="14" viewBox="0 0 20 20" fill="none">
+      <path d="M10 2L2 17h16L10 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      <line x1="10" y1="8" x2="10" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="10" cy="14.5" r=".8" fill="currentColor"/>
+    </svg>
+    <div class="sec-banner-txt">
+      <div class="sec-banner-title" id="bannertitle"></div>
+      <div id="bannerbody"></div>
+    </div>
+  </div>
+
+  <!-- Clipboard card -->
+  <div class="clipcard" id="clipcard">
+    <div class="clipcard-header">
+      <div class="clipcard-dot"></div>
+      <div class="clipcard-title" id="clipcardtitle"></div>
+    </div>
+    <div class="clipcard-body" id="clipcardbody"></div>
+    <div class="clipcard-timer" id="clipcardtimer" style="display:none">
+      <div class="clipcard-secs" id="clipsecs">45</div>
+      <div class="clipcard-timer-right">
+        <div class="clipcard-timer-label">Seconds until reminder</div>
+        <div class="clipbar"><div class="clipfill" id="clipfill" style="width:100%"></div></div>
+      </div>
+    </div>
+    <button class="wipebtn" id="wipebtn"  style="display:none">
+      🗑 Wipe Clipboard Now
+    </button>
+  </div>
+
+      <div class="ctrl">
+    <div class="lsel">
+      <button class="sbtn on" id="b12" aria-pressed="true" >12 · Chars</button>
+      <button class="sbtn"    id="b16" aria-pressed="false" >16 · Chars</button>
+    </div>
+    <details class="advanced" id="advanced">
+      <summary>Customize password <span class="advanced-hint">Optional settings</span></summary>
+      <div class="advanced-body">
+        <label for="customLength" class="setting-title">Password length <output id="lengthValue" for="customLength">12</output></label>
+        <input id="customLength" type="range" min="8" max="64" value="12" step="1"  aria-label="Password length from 8 to 64 characters" />
+        <div class="setting-range"><span>8 characters</span><span>64 characters</span></div>
+        <fieldset class="char-options"><legend class="setting-title">Character types</legend>
+          <label><input type="checkbox" id="optLower" checked  /> Lowercase (a–z)</label>
+          <label><input type="checkbox" id="optUpper" checked  /> Uppercase (A–Z)</label>
+          <label><input type="checkbox" id="optNumbers" checked  /> Numbers (0–9)</label>
+          <label><input type="checkbox" id="optSymbols" checked  /> Symbols (!@#…)</label>
+        </fieldset>
+        <p id="optionHelp" class="option-help" role="status" aria-live="polite">At least one character type must remain selected.</p>
+      </div>
+    </details>
+    <div class="strwrap">
+      <div class="strlbl">Strength</div>
+      <div class="strbar" id="strbar" role="progressbar" aria-label="Estimated password strength" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="strfill" id="strfill"></div></div>
+      <div class="strval" id="strval">—</div>
+    </div>
+    <button class="gbtn" id="gbtn" >▶ Generate Password</button>
+    <div class="arow">
+      <button class="cpbtn" id="copybtn"  disabled>⧉ Copy to Clipboard</button>
+      <button class="clrbtn" id="clearbtn">
+        <svg width="12" height="12" viewBox="0 0 20 20" fill="none">
+          <path d="M4 4l12 12M16 4L4 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Clear
+      </button>
+    </div>
+    <div class="strow"><div class="stmsg" id="stmsg" role="status" aria-live="polite"></div></div>
+      </div>
+    </section>
+    <aside class="info-panel" aria-label="Security and privacy information">
+      <h2 class="info-heading">Security &amp; privacy</h2>
+      <p class="privacy-line">No account · No password storage · Secure randomness</p>
+      <a class="read-guide" href="https://www.cisa.gov/secure-our-world/use-strong-passwords" target="_blank" rel="noopener noreferrer">Read: How to create a strong password ↗</a>
+    <div class="secnote">No password storage · No cookies · Runs offline · crypto.getRandomValues()</div>
+    <div class="led-key">
+      <div class="lk"><div class="lk-dot a"></div> LED 1 — Generating</div>
+      <div class="lk"><div class="lk-dot g"></div> LED 2 — Password Ready</div>
+      <div class="lk"><div class="lk-dot a"></div> LED 3 — Clipboard Hot / Revealed</div>
+      <div class="lk"><div class="lk-dot r"></div> LED 3 — Error</div>
+      <div class="lk"><div class="lk-dot off"></div> Off — Idle / Safe</div>
+    </div>
+    <div class="wnote">
+      <svg class="wicon" width="15" height="15" viewBox="0 0 20 20" fill="none">
+        <path d="M10 2L2 17h16L10 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        <line x1="10" y1="8" x2="10" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="10" cy="14.5" r=".8" fill="currentColor"/>
+      </svg>
+      <div class="wtxt">
+        <strong>Clipboard History Notice</strong>
+        Note: If you have Clipboard History enabled
+        (<span class="kbd">Win + V</span>), you may need to clear it manually.
+        Wiping the current clipboard does not guarantee clearing Windows clipboard history.
+      </div>
+    </div>
+    </aside>
+  </main>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>
