@@ -1,34 +1,32 @@
-
-# Node.js
+# Node and frontend output
 node_modules/
 dist/
 
-# Rust / Tauri
+# Rust / Tauri build output
 target/
 src-tauri/target/
 
-# Environment files
+# Local backups
+/backup/
+
+# Sensitive files and environment
 .env
 .env.*
 !.env.example
-
-# Private signing files
 *.pfx
 *.p12
 *.pem
 *.key
 
-# Generated Windows installers
+# Installer output
+*.exe
 *.msi
 *.msix
 *.msixbundle
-*.exe
+*.appx
+*.appxbundle
 
 # Temporary files
 *.log
 Thumbs.db
 .DS_Store
-
-
-# Local backup files - do not upload to GitHub
-/backup/

@@ -1,11 +1,29 @@
-> **v2.0.2 release correction:** Before building an installer, run `npm run build:web` and confirm the `PASS` message. See `RELEASE-BUILD-FIX.md`.
+# Password Generator — Tauri Windows Edition v2.1.0
 
-# Password Generator — Windows Desktop Edition
+This desktop edition uses the supplied Lovable Solari React interface, adapted into a static, offline Vite/React frontend bundled with Tauri. It does **not** require Lovable hosting or a web server at runtime.
 
-A Tauri v2 Windows desktop port of the user's existing standalone Password Generator. Includes the existing Solari-style UI and password features, bundled locally with no dependency on GitHub Pages at runtime.
+## Requirements
+Node.js, npm, Rust MSVC toolchain, Windows C++ Build Tools, WebView2, and Windows 11.
 
-**Start here:** [WINDOWS-BUILD-GUIDE.md](WINDOWS-BUILD-GUIDE.md).
+## Build and test
 
-This is a separate experimental Windows application source tree. It is **not** a replacement Microsoft Store package. Keep your currently published PWA intact until this version is tested and a Store migration path is confirmed.
+```cmd
+npm install
+npm run build:web
+npm run tauri dev
+npm run tauri build
+```
 
-#  This desktop edition works offline and includes the commands npm install, npm run tauri dev, and npm run tauri build.
+Test the **installed release**, not just development mode, before Store submission. The corrected MSIX must be generated and validated separately as done for v2.0.2.
+
+## Features
+- Exactly 8, 12, 16 character presets (default 8)
+- Clear resets to 8 characters and blanks the display
+- No password-length slider
+- Lovable split-flap UI and right-hand help panel, without the strong-password guide link
+- Local crypto.getRandomValues generation
+- Windows native clipboard integration through Tauri; manual wipe is not guaranteed to erase Windows Clipboard History
+- Offline frontend; no external font imports or web API dependency
+
+## Source and security
+The included original Lovable project is not used as a live backend. Only the offline React screen and its styles were ported; its server/router code and external metadata aren't included. See the supplied Lovable ZIP for the reference source. Preserve your existing v2.0.2 Store package until release testing is complete.
